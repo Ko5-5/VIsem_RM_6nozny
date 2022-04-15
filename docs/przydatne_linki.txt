@@ -1,0 +1,13 @@
+::::ROBOT 6-NOZNY - przydatne linki::::
+
+::UŻYWANY PROCEK
+https://kamami.pl/esp32/573333-esp32-devkitc-32d-v4-plytka-rozwojowa-iot-z-modulem-wi-fi-esp-wroom-32d.html?search_query=ESP32-DEVKITC-32D&results=1
+
+::DOKUMENTACJA - framework Arduino - UŻYWANY przez nas
+https://docs.espressif.com/projects/arduino-esp32/en/latest/
+
+::DOKUMENTACJA - framework ESP-IDF - NIE UŻYWANA ale funkcje działają w frameworku Arduino
+https://docs.espressif.com/projects/esp-idf/en/latest/esp32/
+
+::INSTALACJA PLATFORM IO
+https://randomnerdtutorials.com/vs-code-platformio-ide-esp32-esp8266-arduino/
