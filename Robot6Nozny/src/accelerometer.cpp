@@ -1,6 +1,17 @@
 #include <Arduino.h>
 #include "accelerometer.h"
 
+Accelgyro::Accelgyro()
+{
+    accgyr.initialize();
+
+    accgyr.setXAccelOffset(0);
+    accgyr.setYAccelOffset(0);
+    accgyr.setZAccelOffset(0);
+    accgyr.setXGyroOffset(0);
+    accgyr.setYGyroOffset(0);
+    accgyr.setZGyroOffset(0);
+}
 Accelgyro::Accelgyro(int16_t axoff, int16_t ayoff, int16_t azoff, int16_t gxoff, int16_t gyoff, int16_t gzoff)
 {
     accgyr.initialize();

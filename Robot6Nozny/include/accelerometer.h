@@ -21,6 +21,7 @@ class Accelgyro
     MPU6050 accgyr;
 
     public:
+    Accelgyro();
     Accelgyro(int16_t axoff, int16_t ayoff, int16_t azoff, int16_t gxoff, int16_t gyoff, int16_t gzoff);
     void update();
     bool isConnected() {return accgyr.testConnection();}
