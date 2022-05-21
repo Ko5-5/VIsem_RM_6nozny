@@ -4,23 +4,38 @@
 #include <Arduino.h>
 #include <ESP32Servo.h>
 
-#define PWM_MIN 0           // TO BE DEFINED
-#define PWM_MAX 255         // TO BE DEFINED
+#define PWM_MIN 500  // in us
+#define PWM_MAX 2500 // in us
+#define PWM_FQ 333
 
-class RobotLeg{
+#define POSITION_MOVE_FRONT 20
+#define POSYTION_MOVE_UP 180
+#define POSYTION_MOVE_DOWN 135
+#define DELAY 5
+
+class RobotLeg
+{
+public:
     const uint8_t pwm_servo_1;
     const uint8_t pwm_servo_2;
-    uint16_t frequency;
-    const uint8_t resolution;
 
     uint8_t angleValue;
 
-    Servo leg_servo1;
-    Servo leg_servo2;
+    int last_pos_f; // ostatnia pozycja serwa przod tyl
+    int last_pos_u; // ostatnia pozycja serwa gora dol
 
-public: 
-    RobotLeg(uint8_t _pwm1, uint8_t _pwm2, uint16_t _freq=1000, uint8_t _res=8);
+    bool przycisk; // czy noga dotyka ziemi
+
+    Servo leg_servo1; // serwo do przod tyl
+    Servo leg_servo2; // serwo do Sgora dol
+
+public:
+    RobotLeg(uint8_t _pwm1, uint8_t _pwm2);
     void init();
+    void moveFront();
+    void moveBack();
+    void moveUp();
+    void moveDown();
 };
 
 #endif
