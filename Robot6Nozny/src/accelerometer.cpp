@@ -8,6 +8,8 @@ Accelgyro::Accelgyro(int16_t _axoff, int16_t _ayoff, int16_t _azoff, int16_t _gx
     gxoff(_gxoff),
     gyoff(_gyoff),
     gzoff(_gzoff)
+
+
 {}
 
 void Accelgyro::init(){
@@ -23,4 +25,6 @@ void Accelgyro::init(){
 void Accelgyro::update()
 {
     accgyr.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    accgyr.dmpGetQuaternion(&q, fifoBuffer);
+    accgyr.dmpGetEuler(euler, &q);
 }

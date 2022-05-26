@@ -3,7 +3,10 @@
 
 #include <Arduino.h>
 #include "I2Cdev.h"
-#include "MPU6050.h"
+// #include "MPU6050.h"
+#include <MPU6050_6Axis_MotionApps20.h>
+
+#define RAD_TO_DEG 180/3.14159
 
 // class default I2C adress is 0x68
 
@@ -28,6 +31,7 @@ class Accelgyro
     int16_t gzoff;
 
     public:
+
     Accelgyro(int16_t _axoff=0, int16_t _ayoff=0, int16_t _azoff=0, int16_t _gxoff=0, int16_t _gyoff=0, int16_t _gzoff=0);
     void init();
     void update();
@@ -38,6 +42,7 @@ class Accelgyro
     int16_t getRotX() {return gx;}
     int16_t getRotY() {return gy;}
     int16_t getRotZ() {return gz;}
+    MPU6050& getMPU() {return accgyr;}
 };
 
 
