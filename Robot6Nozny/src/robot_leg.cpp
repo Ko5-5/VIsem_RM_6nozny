@@ -65,6 +65,7 @@ void RobotLeg::moveDown()
     */
     last_pos_u = pos;
 }
+/*
 void RobotLeg::test_legs(RobotLeg leg1,RobotLeg leg2, RobotLeg leg3,RobotLeg leg4, RobotLeg leg5 , RobotLeg leg6){
 leg1.moveUp();  leg1.moveFront();    leg1.moveBack();   leg1.moveDown();
 leg2.moveUp();   leg2.moveFront();   leg2.moveBack();    leg2.moveDown();
@@ -81,4 +82,4 @@ leg2.moveUp();  leg4.moveUp();  leg6.moveUp();
 leg2.moveFront();  leg4.moveFront();  leg6.moveFront();
 leg2.moveDown();  leg4.moveDown();  leg6.moveDown();
 leg1.moveBack();    leg2.moveBack();    leg3.moveBack();    leg4.moveBack();    leg5.moveBack();    leg6.moveBack();
-}
+}*/
