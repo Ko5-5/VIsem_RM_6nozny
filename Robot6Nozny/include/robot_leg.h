@@ -38,4 +38,8 @@ public:
     void moveDown();
 };
 
+void test_legs(RobotLeg leg1,RobotLeg leg2, RobotLeg leg3,RobotLeg leg4, RobotLeg leg5 , RobotLeg leg6);
+void move_robot_front_(RobotLeg leg1,RobotLeg leg2, RobotLeg leg3,RobotLeg leg4, RobotLeg leg5 , RobotLeg leg6);
+
+
 #endif
