@@ -84,18 +84,22 @@ class InputReceivedCallbacks : public BLECharacteristicCallbacks
 
     switch (*inputValue)
     {
-    case 0x02:
+    case 0x00:
     {
-      xSemaphoreTake(mutex_sensor, portMAX_DELAY);
-      sensorFlag = 0;
-      xSemaphoreGive(mutex_sensor);
+      if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+      {
+        sensorFlag = 0;
+        xSemaphoreGive(mutex_sensor);
+      }
       break;
     }
     case 0x01:
     {
-      xSemaphoreTake(mutex_sensor, portMAX_DELAY);
-      sensorFlag = 1;
-      xSemaphoreGive(mutex_sensor);
+      if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+      {
+        sensorFlag = 1;
+        xSemaphoreGive(mutex_sensor);
+      }
       break;
     }
     }
@@ -210,9 +214,12 @@ void bleTaskLoop(void *parameter)
       // if ((millis() - lastTime) > timerDelay)
       //{
       static char proxReading[6];
-      xSemaphoreTake(mutex_sensor, portMAX_DELAY);
-      uint8_t sensor = sensorFlag;
-      xSemaphoreGive(mutex_sensor);
+      static uint8_t sensor = 0;
+      if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+      {
+        sensor = sensorFlag;
+        xSemaphoreGive(mutex_sensor);
+      }
       if (sensor)
         dtostrf(prox.front, 3, 2, proxReading);
       else
@@ -241,10 +248,12 @@ void bleTaskLoop(void *parameter)
 
 void loop()
 {
-  Serial.print("Sensor flag: ");
-  xSemaphoreTake(mutex_sensor, portMAX_DELAY);
-  Serial.println(sensorFlag);
-  xSemaphoreGive(mutex_sensor);
+  if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+  {
+    Serial.print("Sensor flag: ");
+    Serial.println(sensorFlag);
+    xSemaphoreGive(mutex_sensor);
+  }
   vTaskDelay(500 / portTICK_PERIOD_MS);
   // LEGS
   // leg1.moveUp();
