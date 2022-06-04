@@ -1,0 +1,32 @@
+Commands send via BLE using LightBlue App:
+
+### GENERAL COMMANDS ###
+
+0x99        ->  Stand up
+
+### PROX SENSOR SWAP COMMANDS ###
+
+0x00        ->  Sensor back
+0x01        ->  Sensor front
+
+### SINGLE LEG COMMANDS ###
+
+0x(1-6)0    ->  Leg center
+0x(1-6)1    ->  Leg center, move down
+0x(1-6)2    ->  Leg center, move up
+0x(1-6)3    ->  Leg move front
+0x(1-6)4    ->  leg move back
+
+
+### LEG SETS COMMANDS ###
+
+0x81        ->  Set 1, move up
+0x82        ->  Set 1, move down
+0x83        ->  Set 2, move up
+0x84        ->  Set 2, move down
+0x91        ->  Set 1, move front
+0x92        ->  Set 1, move center
+0x93        ->  Set 1, move back
+0x94        ->  Set 2, move front
+0x95        ->  Set 2, move center
+0x96        ->  Set 2, move back

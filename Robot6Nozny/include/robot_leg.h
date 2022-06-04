@@ -8,18 +8,26 @@
 #define PWM_MAX 2500 // in us
 #define PWM_FQ 333
 
-#define POSITION_MOVE_FRONT 20
-#define POSYTION_MOVE_UP 180
-#define POSYTION_MOVE_DOWN 135
+#define POSITION_MOVE_FRONT 10
+#define POSITION_MOVE_CENTER 90
+#define POSITION_MOVE_BACK -10
+#define POSITION_MOVE_UP 140
+#define POSITION_MOVE_DOWN 125
+
 #define DELAY 5
 
 class RobotLeg
 {
-public:
     const uint8_t pwm_servo_1;
     const uint8_t pwm_servo_2;
 
     uint8_t angleValue;
+
+    uint8_t pos_mov_front = POSITION_MOVE_FRONT;
+    uint8_t pos_mov_center = POSITION_MOVE_CENTER;
+    uint8_t pos_mov_back = POSITION_MOVE_BACK;
+    uint8_t pos_mov_up = POSITION_MOVE_UP;
+    uint8_t pos_mov_down = POSITION_MOVE_DOWN;
 
     int last_pos_f; // ostatnia pozycja serwa przod tyl
     int last_pos_u; // ostatnia pozycja serwa gora dol
@@ -31,15 +39,20 @@ public:
 
 public:
     RobotLeg(uint8_t _pwm1, uint8_t _pwm2);
+    RobotLeg(uint8_t _pwm1, uint8_t _pwm2, uint8_t _pos_ct);
+    RobotLeg(uint8_t _pwm1, uint8_t _pwm2, uint8_t _pos_ft, uint8_t _pos_ct, uint8_t _pos_bk, uint8_t _pos_up, uint8_t _pos_dn);
     void init();
+    void halfInit();
+    void deinit();
     void moveFront();
+    void moveCenter();
     void moveBack();
     void moveUp();
     void moveDown();
+    void calibHoriz();
 };
 
-void test_legs(RobotLeg leg1,RobotLeg leg2, RobotLeg leg3,RobotLeg leg4, RobotLeg leg5 , RobotLeg leg6);
-void move_robot_front_(RobotLeg leg1,RobotLeg leg2, RobotLeg leg3,RobotLeg leg4, RobotLeg leg5 , RobotLeg leg6);
-
+void test_legs(RobotLeg leg1, RobotLeg leg2, RobotLeg leg3, RobotLeg leg4, RobotLeg leg5, RobotLeg leg6);
+void move_robot_front_(RobotLeg leg1, RobotLeg leg2, RobotLeg leg3, RobotLeg leg4, RobotLeg leg5, RobotLeg leg6);
 
 #endif

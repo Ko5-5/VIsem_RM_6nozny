@@ -17,17 +17,17 @@ TaskHandle_t BLETask;
 void measureTaskLoop(void *parameter);
 void bleTaskLoop(void *parameter);
 static SemaphoreHandle_t mutex_sensor;
+static SemaphoreHandle_t mutex_leg;
 // ----
 
 // ---- Robot legs
-RobotLeg leg1(PWM_1, PWM_2);
-/*
-RobotLeg leg2(PWM_1, PWM_2);
-RobotLeg leg3(PWM_1, PWM_2);
-RobotLeg leg4(PWM_1, PWM_2);
-RobotLeg leg5(PWM_1, PWM_2);
-RobotLeg leg6(PWM_1, PWM_2);
-*/
+RobotLeg leg1(PWM_1, PWM_2, 100);
+RobotLeg leg2(PWM_3, PWM_4);
+RobotLeg leg3(PWM_5, PWM_6, 80);
+RobotLeg leg4(PWM_7, PWM_8, 80);
+RobotLeg leg5(PWM_9, PWM_10);
+RobotLeg leg6(PWM_11, PWM_12, 100);
+static uint8_t legFlag;
 // ----
 // ---- MPU6050 Accelerometer and gyroscoper
 Accelgyro acgr1;
@@ -82,26 +82,21 @@ class InputReceivedCallbacks : public BLECharacteristicCallbacks
   {
     uint8_t *inputValue = pCharWriteState->getData();
 
-    switch (*inputValue)
-    {
-    case 0x00:
+    if (*inputValue < (uint8_t)0x10)
     {
       if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
       {
-        sensorFlag = 0;
-        xSemaphoreGive(mutex_sensor);
+        sensorFlag = *inputValue == 0x00 ? 0 : 1;
       }
-      break;
+      xSemaphoreGive(mutex_sensor);
     }
-    case 0x01:
+    else
     {
-      if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+      if (xSemaphoreTake(mutex_leg, portMAX_DELAY) == pdTRUE)
       {
-        sensorFlag = 1;
-        xSemaphoreGive(mutex_sensor);
+        legFlag = *inputValue;
+        xSemaphoreGive(mutex_leg);
       }
-      break;
-    }
     }
   }
 };
@@ -109,9 +104,6 @@ class InputReceivedCallbacks : public BLECharacteristicCallbacks
 void setup()
 {
   Serial.begin(115200);
-  // ---- Robots legs init
-  leg1.init();
-  // ----
   // ---- Proximity sensor init
   setupProxFront();
   setupProxBack();
@@ -168,11 +160,21 @@ void setup()
   // ----
   // ---- RTOS tasks init
   mutex_sensor = xSemaphoreCreateMutex();
+  mutex_leg = xSemaphoreCreateMutex();
   xSemaphoreTake(mutex_sensor, portMAX_DELAY);
   xTaskCreatePinnedToCore(measureTaskLoop, "MeasureTask", 1000, NULL, 1, &MeasureTask, 0);
   xTaskCreatePinnedToCore(bleTaskLoop, "BLETask", 10000, NULL, 1, &BLETask, 0);
   xSemaphoreGive(mutex_sensor);
   //  ----
+  // ---- Robots legs init
+  leg1.init();
+  leg2.halfInit();
+  leg3.init();
+  leg4.init();
+  leg5.halfInit();
+  leg6.init();
+  legFlag = 0;
+  // ----
   delay(1000);
 }
 
@@ -254,6 +256,345 @@ void loop()
     Serial.println(sensorFlag);
     xSemaphoreGive(mutex_sensor);
   }
+
+  if (xSemaphoreTake(mutex_leg, portMAX_DELAY) == pdTRUE)
+  {
+    switch (legFlag)
+    {
+    case 0x10:
+    {
+      Serial.println("Servo calib 1");
+      leg1.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x11:
+    {
+      Serial.println("Servo calib 1");
+      leg1.calibHoriz();
+      leg1.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x12:
+    {
+      Serial.println("Servo calib 1");
+      leg1.calibHoriz();
+      leg1.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x13:
+    {
+      Serial.println("Servo calib 1");
+      leg1.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x14:
+    {
+      Serial.println("Servo calib 1");
+      leg1.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x20:
+    {
+      Serial.println("Servo calib 2");
+      leg2.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x21:
+    {
+      Serial.println("Servo calib 2");
+      leg2.calibHoriz();
+      leg2.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x22:
+    {
+      Serial.println("Servo calib 2");
+      leg2.calibHoriz();
+      leg2.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x23:
+    {
+      Serial.println("Servo calib 2");
+      leg2.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x24:
+    {
+      Serial.println("Servo calib 2");
+      leg2.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x30:
+    {
+      Serial.println("Servo calib 3");
+      leg3.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x31:
+    {
+      Serial.println("Servo calib 3");
+      leg3.calibHoriz();
+      leg3.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x32:
+    {
+      Serial.println("Servo calib 3");
+      leg3.calibHoriz();
+      leg3.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x33:
+    {
+      Serial.println("Servo calib 3");
+      leg3.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x34:
+    {
+      Serial.println("Servo calib 3");
+      leg3.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x40:
+    {
+      Serial.println("Servo calib 4");
+      leg4.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x41:
+    {
+      Serial.println("Servo calib 4");
+      leg4.calibHoriz();
+      leg4.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x42:
+    {
+      Serial.println("Servo calib 4");
+      leg4.calibHoriz();
+      leg4.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x43:
+    {
+      Serial.println("Servo calib 4");
+      leg4.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x44:
+    {
+      Serial.println("Servo calib 4");
+      leg4.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x50:
+    {
+      Serial.println("Servo calib 5");
+      leg5.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x51:
+    {
+      Serial.println("Servo calib 5");
+      leg5.calibHoriz();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x52:
+    {
+      Serial.println("Servo calib 5");
+      leg5.calibHoriz();
+      leg5.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x53:
+    {
+      Serial.println("Servo calib 5");
+      leg5.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x54:
+    {
+      Serial.println("Servo calib 5");
+      leg5.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x60:
+    {
+      Serial.println("Servo calib 6");
+      leg6.calibHoriz();
+      legFlag = 0;
+      break;
+    }
+    case 0x61:
+    {
+      Serial.println("Servo calib 6");
+      leg6.calibHoriz();
+      leg6.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x62:
+    {
+      Serial.println("Servo calib 6");
+      leg6.calibHoriz();
+      leg6.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x63:
+    {
+      Serial.println("Servo calib 6");
+      leg6.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x64:
+    {
+      Serial.println("Servo calib 6");
+      leg6.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x81:
+    {
+      Serial.println("Set 1 Up");
+      leg1.moveUp();
+      leg3.moveUp();
+      leg5.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x82:
+    {
+      Serial.println("Set 1 Down");
+      leg1.moveDown();
+      leg3.moveDown();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x83:
+    {
+      Serial.println("Set 2 Up");
+      leg2.moveUp();
+      leg4.moveUp();
+      leg6.moveUp();
+      legFlag = 0;
+      break;
+    }
+    case 0x84:
+    {
+      Serial.println("Set 2 Down");
+      leg2.moveDown();
+      leg4.moveDown();
+      leg6.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x91:
+    {
+      Serial.println("Set 1 Front");
+      leg1.moveFront();
+      leg3.moveFront();
+      leg5.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x92:
+    {
+      Serial.println("Set 1 Center");
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg5.moveCenter();
+      legFlag = 0;
+      break;
+    }
+    case 0x93:
+    {
+      Serial.println("Set 1 Back");
+      leg1.moveBack();
+      leg3.moveBack();
+      leg5.moveBack();
+      legFlag = 0;
+      break;
+    }
+    case 0x94:
+    {
+      Serial.println("Set 2 Front");
+      leg2.moveFront();
+      leg4.moveFront();
+      leg6.moveFront();
+      legFlag = 0;
+      break;
+    }
+    case 0x95:
+    {
+      Serial.println("Set 2 Center");
+      leg2.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
+      legFlag = 0;
+      break;
+    }
+    case 0x96:
+    {
+      Serial.println("Set 2 Back");
+      leg2.moveBack();
+      leg4.moveBack();
+      leg6.moveBack();
+      legFlag = 0;
+      break;
+    }
+
+    case 0x99:
+    {
+      Serial.println("Stand up");
+      leg1.calibHoriz();
+      leg3.calibHoriz();
+      leg4.calibHoriz();
+      leg6.calibHoriz();
+      vTaskDelay(1);
+      leg1.moveDown();
+      leg2.moveDown();
+      leg3.moveDown();
+      leg4.moveDown();
+      leg5.moveDown();
+      leg6.moveDown();
+      legFlag = 0;
+      break;
+    }
+    }
+    xSemaphoreGive(mutex_leg);
+  }
+
   vTaskDelay(500 / portTICK_PERIOD_MS);
   // LEGS
   // leg1.moveUp();
