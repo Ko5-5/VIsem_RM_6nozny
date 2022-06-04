@@ -55,6 +55,18 @@ void RobotLeg::horizDeInit()
     leg_servo1.pwm.detachPin(pwm_servo_1);
 }
 
+void RobotLeg::move1(uint8_t angle)
+{
+    leg_servo1.write(angle);
+    last_pos_f = angle;
+}
+
+void RobotLeg::move2(uint8_t angle)
+{
+    leg_servo2.write(angle);
+    last_pos_f = angle;
+}
+
 void RobotLeg::moveFront()
 {
     leg_servo1.write(pos_mov_center + pos_mov_front);

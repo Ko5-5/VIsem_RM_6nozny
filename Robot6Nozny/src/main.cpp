@@ -10,6 +10,7 @@
 #include "prox_sensor.h"
 #include "accelerometer.h"
 #include "ble_setup.h"
+#include "expander.h"
 
 // ---- RTOS tasks
 TaskHandle_t MeasureTask;
@@ -18,8 +19,8 @@ void measureTaskLoop(void *parameter);
 void bleTaskLoop(void *parameter);
 static SemaphoreHandle_t mutex_sensor;
 static SemaphoreHandle_t mutex_leg;
+static SemaphoreHandle_t mutex_exp;
 // ----
-
 // ---- Robot legs
 RobotLeg leg1(PWM_1, PWM_2, 100);
 RobotLeg leg2(PWM_3, PWM_4);
@@ -28,6 +29,9 @@ RobotLeg leg4(PWM_7, PWM_8, 80);
 RobotLeg leg5(PWM_9, PWM_10);
 RobotLeg leg6(PWM_11, PWM_12, 100);
 static uint8_t legFlag;
+// ----
+// ---- Exapander - leg limit switches
+Expander exp_legs = Expander();
 // ----
 // ---- MPU6050 Accelerometer and gyroscoper
 Accelgyro acgr1;
@@ -56,6 +60,8 @@ volatile proxValues prox;
 // ---- BLE setup
 BLECharacteristic proxSensorReadingCharacteristics("cba1d466-344c-4be3-ab3f-189f80dd7518", BLECharacteristic::PROPERTY_NOTIFY);
 BLEDescriptor proxSensorReadingDescriptor(BLEUUID((uint16_t)0x2902));
+BLECharacteristic expReadingCharacteristics("ae05843c-919b-4d86-b37c-b31c7eb43320", BLECharacteristic::PROPERTY_NOTIFY);
+BLEDescriptor expReadingDescriptor(BLEUUID((uint16_t)0x1902));
 BLECharacteristic *pOutputChar;
 unsigned long lastTime = 0;
 unsigned long timerDelay = 500;
@@ -118,7 +124,8 @@ void setup()
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
   // Create the BLE Service
-  BLEService *proxService = pServer->createService(SERVICE_UUID);
+  BLEService *proxService = pServer->createService(SERVICE_PROX_UUID);
+  BLEService *expService = pServer->createService(SERVICE_EXP_UUID);
   // Create BLE characteristic
   BLECharacteristic *pInputChar = proxService->createCharacteristic(
       CHARACTERISTIC_INPUT_UUID,
@@ -129,11 +136,16 @@ void setup()
   proxService->addCharacteristic(&proxSensorReadingCharacteristics);
   proxSensorReadingDescriptor.setValue("Proximity Sensor Reading");
   proxSensorReadingCharacteristics.addDescriptor(&proxSensorReadingDescriptor);
+  expService->addCharacteristic(&expReadingCharacteristics);
+  expReadingDescriptor.setValue("Expander Reading");
+  expReadingCharacteristics.addDescriptor(&expReadingDescriptor);
   // Start the service
   proxService->start();
+  expService->start();
   // Start advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->addServiceUUID(SERVICE_PROX_UUID);
+  pAdvertising->addServiceUUID(SERVICE_EXP_UUID);
   pServer->getAdvertising()->start();
   Serial.println("Waiting a client connection to notify...");
   // ----
@@ -161,6 +173,7 @@ void setup()
   // ---- RTOS tasks init
   mutex_sensor = xSemaphoreCreateMutex();
   mutex_leg = xSemaphoreCreateMutex();
+  mutex_exp = xSemaphoreCreateMutex();
   xSemaphoreTake(mutex_sensor, portMAX_DELAY);
   xTaskCreatePinnedToCore(measureTaskLoop, "MeasureTask", 1000, NULL, 1, &MeasureTask, 0);
   xTaskCreatePinnedToCore(bleTaskLoop, "BLETask", 10000, NULL, 1, &BLETask, 0);
@@ -174,6 +187,8 @@ void setup()
   leg5.halfInit();
   leg6.init();
   legFlag = 0;
+  // ---- Expander
+  exp_legs.updateButtons();
   // ----
   delay(1000);
 }
@@ -203,7 +218,14 @@ void measureTaskLoop(void *parameter)
     // PROXY SENSORS
     prox.front = zmierzOdlegloscFront();
     prox.back = zmierzOdlegloscBack();
-    vTaskDelay(300 / portTICK_PERIOD_MS);
+    // LEG TOUCH
+    if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
+    {
+      exp_legs.updateButtons();
+      xSemaphoreGive(mutex_exp);
+    }
+    // ----
+    vTaskDelay(200 / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
 }
@@ -216,6 +238,7 @@ void bleTaskLoop(void *parameter)
       // if ((millis() - lastTime) > timerDelay)
       //{
       static char proxReading[6];
+      static char expReading[11] = {':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':'};
       static uint8_t sensor = 0;
       if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
       {
@@ -226,9 +249,21 @@ void bleTaskLoop(void *parameter)
         dtostrf(prox.front, 3, 2, proxReading);
       else
         dtostrf(prox.back, 3, 2, proxReading);
-
+      if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
+      {
+        expReading[0] = exp_legs.buttons[0];
+        expReading[2] = exp_legs.buttons[1];
+        expReading[4] = exp_legs.buttons[2];
+        expReading[6] = exp_legs.buttons[3];
+        expReading[8] = exp_legs.buttons[4];
+        expReading[10] = exp_legs.buttons[5];
+        xSemaphoreGive(mutex_exp);
+      }
       proxSensorReadingCharacteristics.setValue(proxReading);
+      expReadingCharacteristics.setValue(expReading);
       proxSensorReadingCharacteristics.notify();
+      expReadingCharacteristics.notify();
+
       Serial.print("Odleglosc ");
       if (sensor)
       {

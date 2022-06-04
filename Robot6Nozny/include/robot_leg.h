@@ -46,6 +46,8 @@ public:
     void deinit();
     void horizInit();
     void horizDeInit();
+    void move1(uint8_t angle);
+    void move2(uint8_t angle);
     void moveFront();
     void moveCenter();
     void moveBack();

@@ -21,9 +21,10 @@
 class Expander
 {
 public:
-    void setupExp();
-    void loopExp();
+    uint8_t buttons[6] = {0, 0, 0, 0, 0, 0};
+    Expander();
 
+private:
     // configura o GPIO (GP0 ou GP1)
     // como parametro passamos:
     // port: GP0 ou GP1
@@ -31,32 +32,26 @@ public:
     //         OUTPUT para todos as portas do GP trabalharem como saida
     //         custom um valor de 0-255 indicando o modo das portas (1=INPUT, 0=OUTPUT)
     //         ex: 0x01 ou B00000001 ou  1 : indica que apenas o GPX.0 trabalhará como entrada, o restando como saida
-
     void configurePort(uint8_t port, uint8_t custom);
 
     // envia dados para o MCP23016 através do barramento i2c
     // cmd: COMANDO (registrador)
     // data: dados (0-255)
-
     void writeBlockData(uint8_t cmd, uint8_t data);
 
-    // verifica se o botão foi pressionado
-    // parametro GP: GP0 ou GP1
-
-    void checkButton(uint8_t GP);
+    // retorna o valor do bit na posição desejada
+    // pin: posição do bit (0-7)
+    // statusGP: valor lido do GP (0-255)
+    uint8_t valueFromPin(uint8_t pin, uint8_t statusGP);
 
     // faz a leitura de um pino específico
     // pin: pino desejado (0-7)
     // gp: GP0 ou GP1
     // retorno: 0 ou 1
-
     uint8_t readPin(uint8_t pin, uint8_t gp);
 
-    // retorna o valor do bit na posição desejada
-    // pin: posição do bit (0-7)
-    // statusGP: valor lido do GP (0-255)
-
-    uint8_t valueFromPin(uint8_t pin, uint8_t statusGP);
+public:
+    void updateButtons();
 };
 
 #endif
