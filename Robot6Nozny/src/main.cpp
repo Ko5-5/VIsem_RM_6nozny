@@ -264,14 +264,14 @@ void loop()
     case 0x10:
     {
       Serial.println("Servo calib 1");
-      leg1.calibHoriz();
+      leg1.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x11:
     {
       Serial.println("Servo calib 1");
-      leg1.calibHoriz();
+      leg1.moveCenter();
       leg1.moveDown();
       legFlag = 0;
       break;
@@ -279,7 +279,7 @@ void loop()
     case 0x12:
     {
       Serial.println("Servo calib 1");
-      leg1.calibHoriz();
+      leg1.moveCenter();
       leg1.moveUp();
       legFlag = 0;
       break;
@@ -301,14 +301,14 @@ void loop()
     case 0x20:
     {
       Serial.println("Servo calib 2");
-      leg2.calibHoriz();
+      leg2.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x21:
     {
       Serial.println("Servo calib 2");
-      leg2.calibHoriz();
+      leg2.moveCenter();
       leg2.moveDown();
       legFlag = 0;
       break;
@@ -316,7 +316,7 @@ void loop()
     case 0x22:
     {
       Serial.println("Servo calib 2");
-      leg2.calibHoriz();
+      leg2.moveCenter();
       leg2.moveUp();
       legFlag = 0;
       break;
@@ -338,14 +338,14 @@ void loop()
     case 0x30:
     {
       Serial.println("Servo calib 3");
-      leg3.calibHoriz();
+      leg3.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x31:
     {
       Serial.println("Servo calib 3");
-      leg3.calibHoriz();
+      leg3.moveCenter();
       leg3.moveDown();
       legFlag = 0;
       break;
@@ -353,7 +353,7 @@ void loop()
     case 0x32:
     {
       Serial.println("Servo calib 3");
-      leg3.calibHoriz();
+      leg3.moveCenter();
       leg3.moveUp();
       legFlag = 0;
       break;
@@ -375,14 +375,14 @@ void loop()
     case 0x40:
     {
       Serial.println("Servo calib 4");
-      leg4.calibHoriz();
+      leg4.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x41:
     {
       Serial.println("Servo calib 4");
-      leg4.calibHoriz();
+      leg4.moveCenter();
       leg4.moveDown();
       legFlag = 0;
       break;
@@ -390,7 +390,7 @@ void loop()
     case 0x42:
     {
       Serial.println("Servo calib 4");
-      leg4.calibHoriz();
+      leg4.moveCenter();
       leg4.moveUp();
       legFlag = 0;
       break;
@@ -412,14 +412,14 @@ void loop()
     case 0x50:
     {
       Serial.println("Servo calib 5");
-      leg5.calibHoriz();
+      leg5.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x51:
     {
       Serial.println("Servo calib 5");
-      leg5.calibHoriz();
+      leg5.moveCenter();
       leg5.moveDown();
       legFlag = 0;
       break;
@@ -427,7 +427,7 @@ void loop()
     case 0x52:
     {
       Serial.println("Servo calib 5");
-      leg5.calibHoriz();
+      leg5.moveCenter();
       leg5.moveUp();
       legFlag = 0;
       break;
@@ -449,14 +449,14 @@ void loop()
     case 0x60:
     {
       Serial.println("Servo calib 6");
-      leg6.calibHoriz();
+      leg6.moveCenter();
       legFlag = 0;
       break;
     }
     case 0x61:
     {
       Serial.println("Servo calib 6");
-      leg6.calibHoriz();
+      leg6.moveCenter();
       leg6.moveDown();
       legFlag = 0;
       break;
@@ -464,7 +464,7 @@ void loop()
     case 0x62:
     {
       Serial.println("Servo calib 6");
-      leg6.calibHoriz();
+      leg6.moveCenter();
       leg6.moveUp();
       legFlag = 0;
       break;
@@ -483,7 +483,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x81:
+    case 0x80:
     {
       Serial.println("Set 1 Up");
       leg1.moveUp();
@@ -492,7 +492,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x82:
+    case 0x81:
     {
       Serial.println("Set 1 Down");
       leg1.moveDown();
@@ -501,7 +501,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x83:
+    case 0x82:
     {
       Serial.println("Set 2 Up");
       leg2.moveUp();
@@ -510,7 +510,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x84:
+    case 0x83:
     {
       Serial.println("Set 2 Down");
       leg2.moveDown();
@@ -519,7 +519,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x91:
+    case 0x84:
     {
       Serial.println("Set 1 Front");
       leg1.moveFront();
@@ -528,7 +528,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x92:
+    case 0x85:
     {
       Serial.println("Set 1 Center");
       leg1.moveCenter();
@@ -537,7 +537,7 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x93:
+    case 0x86:
     {
       Serial.println("Set 1 Back");
       leg1.moveBack();
@@ -546,16 +546,16 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x94:
+    case 0x87:
     {
       Serial.println("Set 2 Front");
-      leg2.moveFront();
-      leg4.moveFront();
-      leg6.moveFront();
+      leg2.moveBack();
+      leg4.moveBack();
+      leg6.moveBack();
       legFlag = 0;
       break;
     }
-    case 0x95:
+    case 0x88:
     {
       Serial.println("Set 2 Center");
       leg2.moveCenter();
@@ -564,23 +564,193 @@ void loop()
       legFlag = 0;
       break;
     }
-    case 0x96:
+    case 0x89:
     {
       Serial.println("Set 2 Back");
-      leg2.moveBack();
-      leg4.moveBack();
-      leg6.moveBack();
+      leg2.moveFront();
+      leg4.moveFront();
+      leg6.moveFront();
       legFlag = 0;
       break;
     }
-
+    case 0x90:
+    {
+      Serial.println("Center all");
+      leg1.moveCenter();
+      // leg2.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      // leg5.moveCenter();
+      leg6.moveCenter();
+      break;
+    }
+    case 0x91:
+    {
+      Serial.println("A step forward");
+      leg1.moveUp();
+      leg3.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveFront();
+      leg3.moveFront();
+      leg5.moveFront();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveDown();
+      leg3.moveDown();
+      leg5.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg4.moveUp();
+      leg6.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveBack();
+      leg4.moveBack();
+      leg6.moveBack();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg4.moveDown();
+      leg6.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
+      vTaskDelay(400 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x92:
+    {
+      Serial.println("A step backward");
+      leg1.moveUp();
+      leg3.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveBack();
+      leg3.moveBack();
+      leg5.moveBack();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveDown();
+      leg3.moveDown();
+      leg5.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg4.moveUp();
+      leg6.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveFront();
+      leg4.moveFront();
+      leg6.moveFront();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg4.moveDown();
+      leg6.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
+      vTaskDelay(400 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x93:
+    {
+      Serial.println("A turn right");
+      leg1.moveUp();
+      leg3.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveFront();
+      leg3.moveFront();
+      leg5.moveFront();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveDown();
+      leg3.moveDown();
+      leg5.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg4.moveUp();
+      leg6.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveFront();
+      leg4.moveFront();
+      leg6.moveFront();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg4.moveDown();
+      leg6.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
+      vTaskDelay(400 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
+    case 0x94:
+    {
+      Serial.println("A turn left");
+      leg1.moveUp();
+      leg3.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveBack();
+      leg3.moveBack();
+      leg5.moveBack();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveDown();
+      leg3.moveDown();
+      leg5.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg4.moveUp();
+      leg6.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveBack();
+      leg4.moveBack();
+      leg6.moveBack();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg4.moveDown();
+      leg6.moveDown();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg2.moveUp();
+      leg5.moveUp();
+      vTaskDelay(300 / portTICK_PERIOD_MS);
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
+      vTaskDelay(400 / portTICK_PERIOD_MS);
+      leg2.moveDown();
+      leg5.moveDown();
+      legFlag = 0;
+      break;
+    }
     case 0x99:
     {
       Serial.println("Stand up");
-      leg1.calibHoriz();
-      leg3.calibHoriz();
-      leg4.calibHoriz();
-      leg6.calibHoriz();
+      leg1.moveCenter();
+      leg3.moveCenter();
+      leg4.moveCenter();
+      leg6.moveCenter();
       vTaskDelay(1);
       leg1.moveDown();
       leg2.moveDown();

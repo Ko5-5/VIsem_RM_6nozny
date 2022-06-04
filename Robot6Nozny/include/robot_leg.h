@@ -8,10 +8,10 @@
 #define PWM_MAX 2500 // in us
 #define PWM_FQ 333
 
-#define POSITION_MOVE_FRONT 10
+#define POSITION_MOVE_FRONT 40
 #define POSITION_MOVE_CENTER 90
-#define POSITION_MOVE_BACK -10
-#define POSITION_MOVE_UP 140
+#define POSITION_MOVE_BACK -40
+#define POSITION_MOVE_UP 150
 #define POSITION_MOVE_DOWN 125
 
 #define DELAY 5
@@ -23,9 +23,9 @@ class RobotLeg
 
     uint8_t angleValue;
 
-    uint8_t pos_mov_front = POSITION_MOVE_FRONT;
+    int8_t pos_mov_front = POSITION_MOVE_FRONT;
     uint8_t pos_mov_center = POSITION_MOVE_CENTER;
-    uint8_t pos_mov_back = POSITION_MOVE_BACK;
+    int8_t pos_mov_back = POSITION_MOVE_BACK;
     uint8_t pos_mov_up = POSITION_MOVE_UP;
     uint8_t pos_mov_down = POSITION_MOVE_DOWN;
 
@@ -44,12 +44,13 @@ public:
     void init();
     void halfInit();
     void deinit();
+    void horizInit();
+    void horizDeInit();
     void moveFront();
     void moveCenter();
     void moveBack();
     void moveUp();
     void moveDown();
-    void calibHoriz();
 };
 
 void test_legs(RobotLeg leg1, RobotLeg leg2, RobotLeg leg3, RobotLeg leg4, RobotLeg leg5, RobotLeg leg6);
