@@ -18,7 +18,7 @@
 #define IOCON0 0x0A  // I/O EXPANDER CONTROL REGISTER 0
 #define IOCON1 0x0B  // I/O EXPANDER CONTROL REGISTER 1
 
-#define MCPAddress 0x20
+#define MCPAddress 0x27
 
 class Expander
 {
