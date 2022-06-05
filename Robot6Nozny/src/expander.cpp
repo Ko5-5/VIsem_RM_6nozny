@@ -22,7 +22,7 @@ void Expander::writeBlockData(uint8_t cmd, uint8_t data)
   Wire.write(cmd);
   Wire.write(data);
   Wire.endTransmission();
-  delay(10);
+  vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 uint8_t Expander::valueFromPin(uint8_t pin, uint8_t statusGP)
@@ -42,14 +42,17 @@ uint8_t Expander::readPin(uint8_t pin, uint8_t gp)
   return valueFromPin(pin, statusGP);
 }
 
-Expander::Expander()
+void Expander::setup()
 {
-  // Serial.begin(9600);
+  Serial.begin(9600);
   vTaskDelay(1000 / portTICK_PERIOD_MS);
-  Wire.begin(19, 23);    // ESP32
-  Wire.setClock(200000); // frequencia
-  configurePort(IODIR0, INPUT);
-  configurePort(IODIR1, INPUT);
+  uint8_t connect = Wire.begin(I2C_SDA, I2C_SCL, 200000); // ESP32
+  Wire.setClock(200000);                                  // frequencia
+  Serial.println(connect ? "MCP23016 connection succesful" : "MCP23016 connection failed");
+  // configurePort(IODIR0, INPUT);
+  // configurePort(IODIR1, INPUT);
+  writeBlockData(IODIR0, 0xFF);
+  writeBlockData(IODIR1, 0xFF);
 }
 
 void Expander::updateButtons()

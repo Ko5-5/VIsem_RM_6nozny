@@ -18,9 +18,11 @@ int zmierzOdlegloscFront()
     long czas = 0, dystans = 0;
 
     digitalWrite(PROX_TRIG_2, LOW);
-    delayMicroseconds(2);
+    vTaskDelay(2 / portTICK_PERIOD_MS);
+    // delayMicroseconds(2);
     digitalWrite(PROX_TRIG_2, HIGH);
-    delayMicroseconds(10);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // delayMicroseconds(10);
     digitalWrite(PROX_TRIG_2, LOW);
 
     czas = pulseIn(PROX_ECHO_2, HIGH);
@@ -34,9 +36,11 @@ int zmierzOdlegloscBack()
     long czas = 0, dystans = 0;
 
     digitalWrite(PROX_TRIG_1, LOW);
-    delayMicroseconds(2);
+    vTaskDelay(2 / portTICK_PERIOD_MS);
+    // delayMicroseconds(2);
     digitalWrite(PROX_TRIG_1, HIGH);
-    delayMicroseconds(10);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // delayMicroseconds(10);
     digitalWrite(PROX_TRIG_1, LOW);
 
     czas = pulseIn(PROX_ECHO_1, HIGH);

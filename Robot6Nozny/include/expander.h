@@ -1,7 +1,9 @@
 #ifndef EXPANDER_H
 #define EXPANDER_H
 
+#include <Arduino.h>
 #include <Wire.h>
+#include "pinout.h"
 
 #define GP0 0x00     // DATA PORT REGISTER 0
 #define GP1 0x01     // DATA PORT REGISTER 1
@@ -22,7 +24,6 @@ class Expander
 {
 public:
     uint8_t buttons[6] = {0, 0, 0, 0, 0, 0};
-    Expander();
 
 private:
     // configura o GPIO (GP0 ou GP1)
@@ -51,6 +52,7 @@ private:
     uint8_t readPin(uint8_t pin, uint8_t gp);
 
 public:
+    void setup();
     void updateButtons();
 };
 

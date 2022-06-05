@@ -31,7 +31,7 @@ RobotLeg leg6(PWM_11, PWM_12, 100);
 static uint8_t legFlag;
 // ----
 // ---- Exapander - leg limit switches
-Expander exp_legs = Expander();
+Expander exp_legs;
 // ----
 // ---- MPU6050 Accelerometer and gyroscoper
 Accelgyro acgr1;
@@ -60,8 +60,8 @@ volatile proxValues prox;
 // ---- BLE setup
 BLECharacteristic proxSensorReadingCharacteristics("cba1d466-344c-4be3-ab3f-189f80dd7518", BLECharacteristic::PROPERTY_NOTIFY);
 BLEDescriptor proxSensorReadingDescriptor(BLEUUID((uint16_t)0x2902));
-BLECharacteristic expReadingCharacteristics("ae05843c-919b-4d86-b37c-b31c7eb43320", BLECharacteristic::PROPERTY_NOTIFY);
-BLEDescriptor expReadingDescriptor(BLEUUID((uint16_t)0x1902));
+// BLECharacteristic expReadingCharacteristics("ae05843c-919b-4d86-b37c-b31c7eb43320", BLECharacteristic::PROPERTY_NOTIFY);
+// BLEDescriptor expReadingDescriptor(BLEUUID((uint16_t)0x1902));
 BLECharacteristic *pOutputChar;
 unsigned long lastTime = 0;
 unsigned long timerDelay = 500;
@@ -114,6 +114,9 @@ void setup()
   setupProxFront();
   setupProxBack();
   sensorFlag = 0;
+  // ---- Expander
+  exp_legs.setup();
+  exp_legs.updateButtons();
   // ----
   // ---- BLE server init
   // Start serial communication
@@ -125,8 +128,8 @@ void setup()
   pServer->setCallbacks(new MyServerCallbacks());
   // Create the BLE Service
   BLEService *proxService = pServer->createService(SERVICE_PROX_UUID);
-  BLEService *expService = pServer->createService(SERVICE_EXP_UUID);
-  // Create BLE characteristic
+  // BLEService *expService = pServer->createService(SERVICE_EXP_UUID);
+  //  Create BLE characteristic
   BLECharacteristic *pInputChar = proxService->createCharacteristic(
       CHARACTERISTIC_INPUT_UUID,
       BLECharacteristic::PROPERTY_WRITE_NR |
@@ -136,16 +139,16 @@ void setup()
   proxService->addCharacteristic(&proxSensorReadingCharacteristics);
   proxSensorReadingDescriptor.setValue("Proximity Sensor Reading");
   proxSensorReadingCharacteristics.addDescriptor(&proxSensorReadingDescriptor);
-  expService->addCharacteristic(&expReadingCharacteristics);
-  expReadingDescriptor.setValue("Expander Reading");
-  expReadingCharacteristics.addDescriptor(&expReadingDescriptor);
-  // Start the service
+  // expService->addCharacteristic(&expReadingCharacteristics);
+  // expReadingDescriptor.setValue("Expander Reading");
+  // expReadingCharacteristics.addDescriptor(&expReadingDescriptor);
+  //  Start the service
   proxService->start();
-  expService->start();
-  // Start advertising
+  // expService->start();
+  //  Start advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_PROX_UUID);
-  pAdvertising->addServiceUUID(SERVICE_EXP_UUID);
+  // pAdvertising->addServiceUUID(SERVICE_EXP_UUID);
   pServer->getAdvertising()->start();
   Serial.println("Waiting a client connection to notify...");
   // ----
@@ -175,9 +178,11 @@ void setup()
   mutex_leg = xSemaphoreCreateMutex();
   mutex_exp = xSemaphoreCreateMutex();
   xSemaphoreTake(mutex_sensor, portMAX_DELAY);
+  xSemaphoreTake(mutex_exp, portMAX_DELAY);
   xTaskCreatePinnedToCore(measureTaskLoop, "MeasureTask", 1000, NULL, 1, &MeasureTask, 0);
   xTaskCreatePinnedToCore(bleTaskLoop, "BLETask", 10000, NULL, 1, &BLETask, 0);
   xSemaphoreGive(mutex_sensor);
+  xSemaphoreGive(mutex_exp);
   //  ----
   // ---- Robots legs init
   leg1.init();
@@ -187,10 +192,8 @@ void setup()
   leg5.halfInit();
   leg6.init();
   legFlag = 0;
-  // ---- Expander
-  exp_legs.updateButtons();
-  // ----
-  delay(1000);
+  //  ----
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
 void measureTaskLoop(void *parameter)
@@ -222,6 +225,18 @@ void measureTaskLoop(void *parameter)
     if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
     {
       exp_legs.updateButtons();
+      Serial.print("Buttons: ");
+      Serial.print(exp_legs.buttons[0]);
+      Serial.print(" : ");
+      Serial.print(exp_legs.buttons[1]);
+      Serial.print(" : ");
+      Serial.print(exp_legs.buttons[2]);
+      Serial.print(" : ");
+      Serial.print(exp_legs.buttons[3]);
+      Serial.print(" : ");
+      Serial.print(exp_legs.buttons[4]);
+      Serial.print(" : ");
+      Serial.println(exp_legs.buttons[5]);
       xSemaphoreGive(mutex_exp);
     }
     // ----
@@ -238,7 +253,7 @@ void bleTaskLoop(void *parameter)
       // if ((millis() - lastTime) > timerDelay)
       //{
       static char proxReading[6];
-      static char expReading[11] = {':', ':', ':', ':', ':', ':', ':', ':', ':', ':', ':'};
+      // static char expReading[6];
       static uint8_t sensor = 0;
       if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
       {
@@ -249,20 +264,20 @@ void bleTaskLoop(void *parameter)
         dtostrf(prox.front, 3, 2, proxReading);
       else
         dtostrf(prox.back, 3, 2, proxReading);
-      if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
+      /*if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
       {
         expReading[0] = exp_legs.buttons[0];
-        expReading[2] = exp_legs.buttons[1];
-        expReading[4] = exp_legs.buttons[2];
-        expReading[6] = exp_legs.buttons[3];
-        expReading[8] = exp_legs.buttons[4];
-        expReading[10] = exp_legs.buttons[5];
+        expReading[1] = exp_legs.buttons[1];
+        expReading[2] = exp_legs.buttons[2];
+        expReading[3] = exp_legs.buttons[3];
+        expReading[4] = exp_legs.buttons[4];
+        expReading[5] = exp_legs.buttons[5];
         xSemaphoreGive(mutex_exp);
-      }
+      }*/
       proxSensorReadingCharacteristics.setValue(proxReading);
-      expReadingCharacteristics.setValue(expReading);
+      // expReadingCharacteristics.setValue(expReading);
       proxSensorReadingCharacteristics.notify();
-      expReadingCharacteristics.notify();
+      // expReadingCharacteristics.notify();
 
       Serial.print("Odleglosc ");
       if (sensor)
@@ -285,12 +300,12 @@ void bleTaskLoop(void *parameter)
 
 void loop()
 {
-  if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
+  /*if (xSemaphoreTake(mutex_sensor, portMAX_DELAY) == pdTRUE)
   {
     Serial.print("Sensor flag: ");
     Serial.println(sensorFlag);
     xSemaphoreGive(mutex_sensor);
-  }
+  }*/
 
   if (xSemaphoreTake(mutex_leg, portMAX_DELAY) == pdTRUE)
   {
@@ -801,9 +816,4 @@ void loop()
   }
 
   vTaskDelay(500 / portTICK_PERIOD_MS);
-  // LEGS
-  // leg1.moveUp();
-  // delay(2000);
-  // leg1.moveDown();
-  // delay(2000);
 }
