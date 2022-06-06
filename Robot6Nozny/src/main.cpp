@@ -178,15 +178,15 @@ void setup()
   mutex_sensor = xSemaphoreCreateMutex();
   mutex_prox = xSemaphoreCreateMutex();
   mutex_leg = xSemaphoreCreateMutex();
-  // mutex_exp = xSemaphoreCreateMutex();
+  mutex_exp = xSemaphoreCreateMutex();
   xSemaphoreTake(mutex_sensor, portMAX_DELAY);
   xSemaphoreTake(mutex_prox, portMAX_DELAY);
-  // xSemaphoreTake(mutex_exp, portMAX_DELAY);
+  xSemaphoreTake(mutex_exp, portMAX_DELAY);
   xTaskCreatePinnedToCore(measureTaskLoop, "MeasureTask", 1000, NULL, 1, &MeasureTask, 0);
   xTaskCreatePinnedToCore(bleTaskLoop, "BLETask", 10000, NULL, 1, &BLETask, 0);
   xSemaphoreGive(mutex_sensor);
   xSemaphoreGive(mutex_prox);
-  // xSemaphoreGive(mutex_exp);
+  xSemaphoreGive(mutex_exp);
   //   ----
   //  ---- Robots legs init
   leg1.init();
@@ -230,7 +230,7 @@ void measureTaskLoop(void *parameter)
       xSemaphoreGive(mutex_prox);
     }
     // LEG TOUCH
-    /*
+
     if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
     {
       exp_legs.updateButtons();
@@ -247,7 +247,7 @@ void measureTaskLoop(void *parameter)
       Serial.print(" : ");
       Serial.println(exp_legs.buttons[5]);
       xSemaphoreGive(mutex_exp);
-    }*/
+    }
     // ----
     vTaskDelay(200 / portTICK_PERIOD_MS);
   }
