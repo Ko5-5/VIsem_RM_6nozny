@@ -18,6 +18,7 @@ TaskHandle_t BLETask;
 void measureTaskLoop(void *parameter);
 void bleTaskLoop(void *parameter);
 static SemaphoreHandle_t mutex_sensor;
+static SemaphoreHandle_t mutex_prox;
 static SemaphoreHandle_t mutex_leg;
 static SemaphoreHandle_t mutex_exp;
 // ----
@@ -175,16 +176,19 @@ void setup()
   // ----
   // ---- RTOS tasks init
   mutex_sensor = xSemaphoreCreateMutex();
+  mutex_prox = xSemaphoreCreateMutex();
   mutex_leg = xSemaphoreCreateMutex();
-  mutex_exp = xSemaphoreCreateMutex();
+  // mutex_exp = xSemaphoreCreateMutex();
   xSemaphoreTake(mutex_sensor, portMAX_DELAY);
-  xSemaphoreTake(mutex_exp, portMAX_DELAY);
+  xSemaphoreTake(mutex_prox, portMAX_DELAY);
+  // xSemaphoreTake(mutex_exp, portMAX_DELAY);
   xTaskCreatePinnedToCore(measureTaskLoop, "MeasureTask", 1000, NULL, 1, &MeasureTask, 0);
   xTaskCreatePinnedToCore(bleTaskLoop, "BLETask", 10000, NULL, 1, &BLETask, 0);
   xSemaphoreGive(mutex_sensor);
-  xSemaphoreGive(mutex_exp);
-  //  ----
-  // ---- Robots legs init
+  xSemaphoreGive(mutex_prox);
+  // xSemaphoreGive(mutex_exp);
+  //   ----
+  //  ---- Robots legs init
   leg1.init();
   leg2.halfInit();
   leg3.init();
@@ -219,9 +223,14 @@ void measureTaskLoop(void *parameter)
       Serial.print(euler[2] + 180 / M_PI);
     }*/
     // PROXY SENSORS
-    prox.front = zmierzOdlegloscFront();
-    prox.back = zmierzOdlegloscBack();
+    if (xSemaphoreTake(mutex_prox, portMAX_DELAY) == pdTRUE)
+    {
+      prox.front = zmierzOdlegloscFront();
+      prox.back = zmierzOdlegloscBack();
+      xSemaphoreGive(mutex_prox);
+    }
     // LEG TOUCH
+    /*
     if (xSemaphoreTake(mutex_exp, portMAX_DELAY) == pdTRUE)
     {
       exp_legs.updateButtons();
@@ -238,7 +247,7 @@ void measureTaskLoop(void *parameter)
       Serial.print(" : ");
       Serial.println(exp_legs.buttons[5]);
       xSemaphoreGive(mutex_exp);
-    }
+    }*/
     // ----
     vTaskDelay(200 / portTICK_PERIOD_MS);
   }
@@ -636,81 +645,99 @@ void loop()
     }
     case 0x91:
     {
-      Serial.println("A step forward");
-      leg1.moveUp();
-      leg3.moveUp();
-      leg5.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveFront();
-      leg3.moveFront();
-      leg5.moveFront();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveDown();
-      leg3.moveDown();
-      leg5.moveDown();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveUp();
-      leg4.moveUp();
-      leg6.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveBack();
-      leg4.moveBack();
-      leg6.moveBack();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveDown();
-      leg4.moveDown();
-      leg6.moveDown();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveUp();
-      leg5.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveCenter();
-      leg3.moveCenter();
-      leg4.moveCenter();
-      leg6.moveCenter();
-      vTaskDelay(400 / portTICK_PERIOD_MS);
-      leg2.moveDown();
-      leg5.moveDown();
+      if (xSemaphoreTake(mutex_prox, portMAX_DELAY) == pdTRUE)
+      {
+        if (prox.back > 10)
+        {
+          xSemaphoreGive(mutex_prox);
+          Serial.println("A step forward");
+          leg1.moveUp();
+          leg3.moveUp();
+          leg5.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveFront();
+          leg3.moveFront();
+          leg5.moveFront();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveDown();
+          leg3.moveDown();
+          leg5.moveDown();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveUp();
+          leg4.moveUp();
+          leg6.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveBack();
+          leg4.moveBack();
+          leg6.moveBack();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveDown();
+          leg4.moveDown();
+          leg6.moveDown();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveUp();
+          leg5.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveCenter();
+          leg3.moveCenter();
+          leg4.moveCenter();
+          leg6.moveCenter();
+          vTaskDelay(400 / portTICK_PERIOD_MS);
+          leg2.moveDown();
+          leg5.moveDown();
+        }
+        else
+          xSemaphoreGive(mutex_prox);
+      }
       legFlag = 0;
       break;
     }
     case 0x92:
     {
-      Serial.println("A step backward");
-      leg1.moveUp();
-      leg3.moveUp();
-      leg5.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveBack();
-      leg3.moveBack();
-      leg5.moveBack();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveDown();
-      leg3.moveDown();
-      leg5.moveDown();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveUp();
-      leg4.moveUp();
-      leg6.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveFront();
-      leg4.moveFront();
-      leg6.moveFront();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveDown();
-      leg4.moveDown();
-      leg6.moveDown();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg2.moveUp();
-      leg5.moveUp();
-      vTaskDelay(300 / portTICK_PERIOD_MS);
-      leg1.moveCenter();
-      leg3.moveCenter();
-      leg4.moveCenter();
-      leg6.moveCenter();
-      vTaskDelay(400 / portTICK_PERIOD_MS);
-      leg2.moveDown();
-      leg5.moveDown();
+      if (xSemaphoreTake(mutex_prox, portMAX_DELAY) == pdTRUE)
+      {
+        if (prox.front > 10)
+        {
+          xSemaphoreGive(mutex_prox);
+          Serial.println("A step backward");
+          leg1.moveUp();
+          leg3.moveUp();
+          leg5.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveBack();
+          leg3.moveBack();
+          leg5.moveBack();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveDown();
+          leg3.moveDown();
+          leg5.moveDown();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveUp();
+          leg4.moveUp();
+          leg6.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveFront();
+          leg4.moveFront();
+          leg6.moveFront();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveDown();
+          leg4.moveDown();
+          leg6.moveDown();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg2.moveUp();
+          leg5.moveUp();
+          vTaskDelay(300 / portTICK_PERIOD_MS);
+          leg1.moveCenter();
+          leg3.moveCenter();
+          leg4.moveCenter();
+          leg6.moveCenter();
+          vTaskDelay(400 / portTICK_PERIOD_MS);
+          leg2.moveDown();
+          leg5.moveDown();
+        }
+        else
+          xSemaphoreGive(mutex_prox);
+      }
       legFlag = 0;
       break;
     }
